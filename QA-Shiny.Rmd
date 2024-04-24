@@ -1,0 +1,174 @@
+---
+title: "Charts from MS1"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+    runtime: shiny
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+```
+
+# Plot 
+
+## Column {data-width=600, .tabset}
+
+### Plot A
+
+```{r}
+library(MASS)
+library(vcd)
+library(vcdExtra)
+library(ggplot2)
+library(ca)
+library(seriation)
+library(dplyr)
+library(DT)
+
+data(birthwt)
+
+birthwt2 <- within(birthwt, {
+  race <- factor(race, labels = c("white", "black", "other"))
+  ptl <- factor(ptl > 0) # premature labors
+  ftv <- factor(ftv) # physician visits
+  levels(ftv)[-(1:2)] <- "2+"
+  smoke <- factor(smoke>0)
+  ht <- factor(ht>0)
+  ui <- factor(ui>0)
+})
+
+ggplot(birthwt, aes(x = age, y = low)) +
+geom_point() +
+labs(title = "Low birth weight by age")
+
+```
+
+
+
+### Plot A2
+```{r}
+ggplot(birthwt, aes(x = lwt, y = low)) +
+geom_point() +
+labs(title = "Low birth weight by lwt")
+
+```
+
+
+### Plott A3
+
+```{r}
+barplot(table(birthwt2$race, birthwt2$low), beside = TRUE, legend = TRUE, col = c("red", "blue", "green"), main = "Race vs. Low Birth Weight", ylab= "Count", xlab= "Race")
+#xtabs(~low + race, data=birthwt2)
+
+```
+
+
+
+### Plot A4
+
+```{r}
+barplot(table(birthwt2$smoke, birthwt2$low), beside = TRUE, legend = TRUE, col = c("red", "blue"), main = "Smoke vs. Low Birth Weight", ylab= "Count", xlab="Smoke")
+#xtabs(~low + smoke, data=birthwt2)
+
+```
+
+
+
+Column {data-width=300}
+-----------------------------------------------------------------------
+
+### Plot B
+
+```{r}
+wt.ptl_low<-table(birthwt2$low, birthwt2$ptl)
+#wt.ptl_low
+#assocstats(wt.ptl_low)
+#oddsratio(wt.ptl_low, log = FALSE)
+fourfold(wt.ptl_low, main = "Low Birth Weight and Premature Labours")
+```
+
+### Plot C
+
+```{r}
+
+wt.ht_low<-table(birthwt2$low, birthwt2$ht)
+#assocstats(wt.ht_low)
+#oddsratio(wt.ht_low, log = FALSE)
+fourfold(wt.ht_low, main = "Low Birth Weight and History of Hypertension")
+```
+
+
+
+Column {data-width=300}
+-----------------------------------------------------------------------
+
+### Plot D
+
+```{r}
+energy<-read.csv("power_data.csv", header = TRUE, row.name="X")
+x <-  as.POSIXct(energy$Datetime, format="%Y-%m-%d %H:%M:%S")
+
+year <- as.numeric(format(x, '%Y'))
+month <- as.numeric(format(x, '%m'))
+day <- as.numeric(format(x, '%d'))
+hour <- as.numeric(format(x, '%H'))
+
+energy<-cbind(energy, year, month, day, hour)
+energy <- energy %>% mutate(Datetime = as.POSIXct(Datetime, format="%Y-%m-%d %H:%M:%S"))
+
+energy<-energy[order(energy$Datetime), ]
+rownames(energy) <- NULL
+
+plot(energy$year,energy$Power_MWH, type="l", xlab = "year",
+ylab="Consumption", ylim = c(23000, 41000))
+
+```
+
+
+### Plot E
+
+```{r}
+par(mfrow=c(3,1))
+
+plot1 <- plot(energy[, 4], xlab = "year", ylab = "Month Totals (Gwh)", type="l",main="Monthly",col = "blue")
+
+plot2 <- plot(energy[, 5], xlab = "year", ylab = "Daily Totals (GWh)", type="l",
+lwd=2,main="Daily", col = "red")
+
+plot3 <- plot(energy[, 6], xlab = "year", ylab = "Hours Totals (Gwh)", type="l",
+main="Hours",col = "purple")
+
+```
+
+
+# Table
+
+```{r}
+#data(birthwt)
+#birthwt
+birthwt2 <- within(birthwt, {
+  race <- factor(race, labels = c("white", "black", "other"))
+  ptl <- factor(ptl > 0) # premature labors
+  ftv <- factor(ftv) # physician visits
+  levels(ftv)[-(1:2)] <- "2+"
+  smoke <- factor(smoke>0)
+  ht <- factor(ht>0)
+  ui <- factor(ui>0)
+})
+#birthwt2
+
+datatable(
+  birthwt,
+  extensions = 'Buttons', options = list(
+    dom = 'Bfrtip',
+    buttons = c('copy', 'print', 'csv')
+  )
+)
+
+```
+
+
+
+

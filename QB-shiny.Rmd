@@ -1,0 +1,286 @@
+---
+title: "Value boxes and gauges"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: scroll
+---
+
+```{r setup, include=FALSE}
+# Import library and dataset
+
+library(flexdashboard)
+library(MASS)
+
+library(dplyr)
+
+
+#birthwt
+birthwt2 <- within(birthwt, {
+race <- factor(race, labels = c("white", "black", "other"))
+ptl <- factor(ptl > 0) # premature labors
+ftv <- factor(ftv) # physician visits
+levels(ftv)[-(1:2)] <- "2+"
+smoke <- factor(smoke>0)
+ht <- factor(ht>0)
+ui <- factor(ui>0)
+})
+birthwt2
+
+#energy
+energy<-read.csv("power_data.csv", header = TRUE, row.name="X")
+x <- as.POSIXct(energy$Datetime, format="%Y-%m-%d %H:%M:%S")
+year <- as.numeric(format(x, '%Y'))
+month <- as.numeric(format(x, '%m'))
+day <- as.numeric(format(x, '%d'))
+hour <- as.numeric(format(x, '%H'))
+energy<-cbind(energy, year, month, day, hour)
+energy <- energy %>% mutate(Datetime = as.POSIXct(Datetime, format="%Y-%m-%d %H:%M:%S"))
+energy<-energy[order(energy$Datetime), ]
+rownames(energy) <- NULL
+```
+
+# Q1 Value boxes
+
+## Row
+
+### Low birth weight count
+
+```{r}
+low_birth_weight_count = sum(birthwt2$low == 1)
+valueBox(low_birth_weight_count, 
+         icon="fa-baby",
+         color = "#ff9f80")
+```
+
+### Normal birth weight count
+
+```{r}
+normal_birth_weight_count = sum(birthwt2$low == 0)
+valueBox(normal_birth_weight_count, 
+         icon="fa-baby",
+         color = "#cc3300")
+```
+
+## Row
+
+### Low birth weight (black)
+
+```{r}
+low_birth_weight_black = sum(birthwt2$low == 0 & birthwt2$race == "black")
+valueBox(low_birth_weight_black, 
+         icon="fa-user",
+         color = "#b3e0ff")
+```
+
+### Low birth weight (white)
+
+```{r}
+low_birth_weight_white = sum(birthwt2$low == 0 & birthwt2$race == "white")
+valueBox(low_birth_weight_white, 
+         icon="fa-user",
+         color = "#002080")
+```
+
+### Low birth weight (other races)
+
+```{r}
+low_birth_weight_others = sum(birthwt2$low == 0 & birthwt2$race == "other")
+valueBox(low_birth_weight_others, 
+         icon="fa-user",
+         color = "#008ae6")
+```
+
+## Row
+
+### Low birth weight (ptl = FALSE)
+
+```{r}
+low_birth_weight_ptl_False = sum(birthwt2$low == 0 & birthwt2$ptl == FALSE)
+valueBox(low_birth_weight_ptl_False, 
+         icon="fa-person-pregnant",
+         color = "#ffff00")
+```
+
+### Low birth weight (ptl =TRUE)
+
+```{r}
+low_birth_weight_plt_True = sum(birthwt2$low == 0 & birthwt2$ptl == TRUE)
+valueBox(low_birth_weight_plt_True, 
+         icon="fa-person-pregnant",
+         color = "#ffffb3")
+```
+
+
+# Q2 Value Box 
+
+## Row
+
+### Total energy consumption during January 2010
+
+```{r}
+# Filter the data set for January 2010 and calculate the sum of POWER_MH
+consumption_jan_2010 <- energy %>%
+  filter(year == 2010, month == 1) %>%
+  summarise(total_power = sum(Power_MWH, na.rm = TRUE))
+
+valueBox(consumption_jan_2010$total_power, 
+         icon = "fa-lightbulb-o",
+         color = "#ffffb3")
+```
+
+### Energy consumption during May 2010
+
+```{r}
+consumption_may_2010 <- energy %>%
+  filter(year == 2010, month == 5) %>%
+  summarise(total_power = sum(Power_MWH, na.rm = TRUE))
+
+valueBox(consumption_may_2010$total_power, 
+         icon = "fa-lightbulb-o",
+         color = "#ffffb3")
+
+```
+
+### Energy consumption during September 2010
+
+```{r}
+consumption_sep_2010 <- energy %>%
+  filter(year == 2010, month == 9) %>%
+  summarise(total_power = sum(Power_MWH, na.rm = TRUE))
+
+valueBox(consumption_sep_2010$total_power, 
+         icon = "fa-lightbulb-o",
+         color = "#ffffb3")
+
+```
+
+# Q1 Gauges
+
+## Row
+
+### The percentage of mothers who had low infant birth (low = 1)
+
+```{r}
+# Calculate the percentage of mothers with low infant birth
+proportion_low_infant_birth <- (sum(birthwt2$low == 1, na.rm = TRUE) * 100) / nrow(birthwt2)
+
+gauge(proportion_low_infant_birth, min = 0, max = 100, symbol = "%", 
+  gaugeSectors(
+    success = c(0, 39),
+    warning = c(40, 79),
+    danger = c(80, 100)
+  ))
+```
+
+### The percentage of mothers who had normal infant birth (low = 0)
+
+```{r}
+# Calculate the percentage of mothers with low infant birth
+proportion_normal_infant_birth <- (sum(birthwt2$low == 0, na.rm = TRUE) * 100) / nrow(birthwt2)
+
+gauge(proportion_normal_infant_birth, min = 0, max = 100, symbol = "%", 
+      gaugeSectors(
+        danger = c(0, 39),
+        warning = c(40, 79),
+        success = c(80, 100)
+      ))
+```
+
+## Row
+
+### The percentage of low birth weight for black race only
+
+```{r}
+# Calculate the percentage of black individuals with low infant birth
+proportion_low_black <- (sum(birthwt2$race == 'black' & birthwt2$low == 1, na.rm = TRUE) * 100) / sum(birthwt2$race == 'black', na.rm = TRUE)
+
+gauge(proportion_low_black, min = 0, max = 100, symbol = "%", 
+      gaugeSectors(
+        success = c(0, 39),
+        warning = c(40, 79),
+        danger = c(80, 100)
+      ))
+```
+
+### The percentage of low birth weight for white race only
+
+```{r}
+# Calculate the percentage of black individuals with low infant birth
+proportion_low_white <- (sum(birthwt2$race == 'white' & birthwt2$low == 1, na.rm = TRUE) * 100) / sum(birthwt2$race == 'white', na.rm = TRUE)
+
+gauge(proportion_low_white, min = 0, max = 100, symbol = "%", 
+      gaugeSectors(
+        success = c(0, 39),
+        warning = c(40, 79),
+        danger = c(80, 100)
+      ))
+```
+
+### The percentage of low birth weight for other races only
+
+```{r}
+# Calculate the percentage of black individuals with low infant birth
+proportion_low_other <- (sum(birthwt2$race == 'other' & birthwt2$low == 1, na.rm = TRUE) * 100) / sum(birthwt2$race == 'other', na.rm = TRUE)
+
+gauge(proportion_low_other, min = 0, max = 100, symbol = "%", 
+      gaugeSectors(
+        success = c(0, 39),
+        warning = c(40, 79),
+        danger = c(80, 100)
+      ))
+```
+
+# Q2 Gauges
+
+## Row
+
+### Percentage of Energy consumption in 2010 for January only
+
+```{r}
+prop_jan_energy_2010 <- energy %>%
+  filter(year == 2010, month == 1) %>%
+  summarise(total_power = sum(Power_MWH, na.rm = TRUE)) %>%
+  mutate(percentage = (total_power / sum(energy$Power_MWH[energy$year == 2010], na.rm = TRUE)) * 100)
+  
+gauge(prop_jan_energy_2010$percentage, min = 0, max = 100, symbol = "%", 
+      gaugeSectors(
+        success = c(0, 39),
+        warning = c(40, 79),
+        danger = c(80, 100)
+      ))
+
+```
+
+### Percentage of Energy consumption in 2015 for January only
+
+```{r}
+prop_jan_energy_2015 <- energy %>%
+  filter(year == 2015, month == 1) %>%
+  summarise(total_power = sum(Power_MWH, na.rm = TRUE)) %>%
+  mutate(percentage = (total_power / sum(energy$Power_MWH[energy$year == 2015], na.rm = TRUE)) * 100)
+
+gauge(prop_jan_energy_2015$percentage, min = 0, max = 100, symbol = "%", 
+      gaugeSectors(
+        success = c(0, 39),
+        warning = c(40, 79),
+        danger = c(80, 100)
+      ))
+```
+
+### Percentage of Energy consumption in 2017 for January only
+
+```{r}
+prop_jan_energy_2017 <- energy %>%
+  filter(year == 2017, month == 1) %>%
+  summarise(total_power = sum(Power_MWH, na.rm = TRUE)) %>%
+  mutate(percentage = (total_power / sum(energy$Power_MWH[energy$year == 2017], na.rm = TRUE)) * 100)
+
+gauge(prop_jan_energy_2017$percentage, min = 0, max = 100, symbol = "%", 
+      gaugeSectors(
+        success = c(0, 39),
+        warning = c(40, 79),
+        danger = c(80, 100)
+      ))
+
+```

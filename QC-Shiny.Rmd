@@ -1,0 +1,87 @@
+---
+title: "P2-Q1"
+author: "Xi Pan"
+date: "2024-04-08"
+output: html_document
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(shiny)
+library(viridisLite)
+library(DT)
+library(MASS)
+library(vcd)
+library(vcdExtra)
+library(ggplot2)
+library(plotly)
+library(ca)
+library(seriation)
+library(dplyr)
+library(dygraphs)
+library(xts)
+library(tidyr)
+
+#birthwt database
+data(birthwt)
+birthwt2 <- within(birthwt, {
+race <- factor(race, labels = c("white", "black", "other"))
+ptl <- factor(ptl > 0) # premature labors
+ftv <- factor(ftv) # physician visits
+levels(ftv)[-(1:2)] <- "2+"
+smoke <- factor(smoke>0)
+ht <- factor(ht>0)
+ui <- factor(ui>0)
+})
+birthwt2
+
+#energy database
+energy<-read.csv("power_data.csv", header = TRUE, row.name="X")
+x <- as.POSIXct(energy$Datetime, format="%Y-%m-%d %H:%M:%S")
+year <- as.numeric(format(x, '%Y'))
+month <- as.numeric(format(x, '%m'))
+day <- as.numeric(format(x, '%d'))
+hour <- as.numeric(format(x, '%H'))
+realDate <- as.Date(x)
+energy<-cbind(energy, year, month, day, hour, realDate)
+energy <- energy %>% mutate(Datetime = as.POSIXct(Datetime, format="%Y-%m-%d %H:%M:%S"))
+energy<-energy[order(energy$Datetime), ]
+rownames(energy) <- NULL
+
+energy <- energy %>% 
+  fill(realDate)
+
+energy2017 = subset(energy,
+subset= energy$year == 2017)
+head(energy2017)
+
+```
+
+```{r}
+datatable(birthwt2, options=list(pageLength=15))
+```
+
+```{r}
+datatable(energy, options=list(pageLength=15))
+```
+
+```{r include=FALSE}
+source("app.R")
+```
+
+```{r echo=FALSE, out.width='100%', out.height='600px'}
+htmltools::tags$iframe(
+  src = "https://xp-seneca2024.shinyapps.io/Q1-Interactive/", 
+  style = "border: none; width: 100%; height: 600px"
+)
+```
+
+```{r}
+xts.energy<-xts(energy$Power_MWH, order.by = energy$realDate)
+dygraph(xts.energy, main = "Energy Consumption") %>%
+  dyRangeSelector()
+```
+
+
+
