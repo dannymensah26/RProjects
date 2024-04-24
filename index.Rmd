@@ -1,0 +1,8 @@
+---
+title: "Project 2 Milestone 2"
+output: html_document
+---
+
+- Xi Pan
+- Haingo Razafindranto
+- Daniel Opoku Mensah

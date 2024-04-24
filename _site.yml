@@ -1,0 +1,14 @@
+name: "my-website"
+include: "./Q1-Interactive/app.R"
+navbar:
+  title: "Project2 Website"
+  left:
+    - text: "Project 2 Milestone 2"
+      href: "index.html"
+    - text: "Charts from MS1"
+      href: QA-Shiny.html
+    - text: "Value boxes and gauges"
+      href: QB-Shiny.html
+    - text: "Q1 and Q2 Interactive Chart"
+      href: QC-Shiny.html
+
