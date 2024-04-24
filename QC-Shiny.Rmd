@@ -1,6 +1,6 @@
 ---
 title: "P2-Q1"
-author: "Xi Pan"
+author: "Daniel Mensah"
 date: "2024-04-08"
 output: html_document
 runtime: shiny

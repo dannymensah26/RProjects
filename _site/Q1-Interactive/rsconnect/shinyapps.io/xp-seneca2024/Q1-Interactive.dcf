@@ -1,0 +1,12 @@
+name: Q1-Interactive
+title: Q1-Interactive
+username: xp-seneca2024
+account: xp-seneca2024
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 11708112
+bundleId: 8472173
+url: https://xp-seneca2024.shinyapps.io/Q1-Interactive/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
